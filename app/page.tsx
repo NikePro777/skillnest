@@ -14,10 +14,10 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <div className="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-                Scientia
+                Компас
               </div>
               <Badge variant="outline" className="border-indigo-500 text-indigo-600">
-                Бета
+                Твой проводник в мир знаний
               </Badge>
             </div>
 

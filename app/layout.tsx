@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Scientia',
+  title: 'Компас',
   description: 'Образовательная платформа',
 };
 

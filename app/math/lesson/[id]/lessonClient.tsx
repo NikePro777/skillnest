@@ -1,14 +1,16 @@
 'use client'; // ← ЭТО КЛЮЧЕВОЙ МОМЕНТ!
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, CheckCircle, XCircle, Lightbulb, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { type Lesson } from './lessonsData';
+import { type Lesson, lessons } from './lessonsData';
 
 export default function LessonClient({ lesson, lessonId }: { lesson: Lesson; lessonId: number }) {
+  const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const [showHint, setShowHint] = useState(false);
@@ -20,7 +22,14 @@ export default function LessonClient({ lesson, lessonId }: { lesson: Lesson; les
   };
 
   const handleNext = () => {
-    alert(`Урок ${lessonId + 1} в разработке!`);
+    const nextLessonId = lessonId + 1;
+
+    if (lessons[nextLessonId]) {
+      router.push(`/math/lesson/${nextLessonId}`);
+    } else {
+      alert('🎉 Поздравляем! Вы прошли все уроки курса!');
+      router.push('/');
+    }
   };
 
   return (

@@ -12,6 +12,7 @@ import {
   getAllAvailableGrades,
   Lesson,
 } from '@/app/math/courses/lessonsData';
+import { getFirstLessonPath } from '@/app/math/courses/lessonsData';
 
 const GRADES = [5, 6, 7, 8, 9, 10, 11];
 
@@ -169,12 +170,12 @@ export default function CourseFilter({ initialCourses }: { initialCourses: Lesso
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white gap-2"
-                    disabled={course.status === 'coming_soon'}>
-                    {course.status === 'coming_soon' ? 'Скоро' : 'Начать курс'}
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
+                  <Link href={getFirstLessonPath(course.id)} className="w-full">
+                    <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
+                      Начать курс
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
                 </CardFooter>
               </Card>
             ))}

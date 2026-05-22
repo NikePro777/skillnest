@@ -1,7 +1,7 @@
 // Типы для уроков этого курса
 export type LessonStep = {
   id: number;
-  type: 'theory' | 'question' | 'practice' | 'motivation' | 'congrats';
+  type: 'theory' | 'training' | 'question' | 'practice' | 'motivation' | 'congrats';
   title?: string;
   content: string;
   options?: string[];
@@ -9,6 +9,9 @@ export type LessonStep = {
   hint?: string;
   explanation?: string;
   xp: number;
+  allowInfiniteAttempts?: boolean; // для тренировочных заданий
+  taskBank?: string;
+  tasksPerStep?: number;
 };
 
 export type DifficultyLevel = {

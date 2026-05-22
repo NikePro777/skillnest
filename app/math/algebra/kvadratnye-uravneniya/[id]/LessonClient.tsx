@@ -28,6 +28,7 @@ export default function LessonClient({
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [earnedXp, setEarnedXp] = useState(0);
   const [showHint, setShowHint] = useState(false);
+  const [theoryCompleted, setTheoryCompleted] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
   const [showChoiceDialog, setShowChoiceDialog] = useState(false);
   const [showMediumChoiceDialog, setShowMediumChoiceDialog] = useState(false);
@@ -72,6 +73,24 @@ export default function LessonClient({
     if (!selectedAnswer) return;
 
     const isCorrect = selectedAnswer === currentStep.correct;
+
+    // В handleCheck для тренировочных заданий (allowInfiniteAttempts)
+    if (currentStep.allowInfiniteAttempts) {
+      if (isCorrect) {
+        // Просто показываем правильность и переходим дальше
+        if (!isLastStep) {
+          setCurrentStepIndex((prev) => prev + 1);
+          setSelectedAnswer(null);
+          setShowExplanation(false);
+        } else {
+          setTheoryCompleted(true);
+        }
+      } else {
+        // Неправильно — не теряем жизни, просто показываем объяснение
+        setShowExplanation(true);
+      }
+      return;
+    }
 
     if (isCorrect) {
       // Начисляем XP
@@ -426,6 +445,51 @@ export default function LessonClient({
                   className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl">
                   → На главную
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Модальное окно выбора уровня после теории */}
+        {theoryCompleted && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+            <div className="bg-white rounded-2xl max-w-md w-full mx-4 p-6 text-center shadow-2xl">
+              <div className="text-5xl mb-4">🎯</div>
+              <h2 className="text-2xl font-bold mb-2">Теперь к практике!</h2>
+              <p className="text-gray-600 mb-4">Ты освоил теорию. Выбери уровень сложности:</p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setTheoryCompleted(false);
+                    router.push(`/math/algebra/kvadratnye-uravneniya/${lessonId}?difficulty=light`);
+                  }}
+                  className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-all">
+                  🌱 Лёгкий (3 жизни, базовые задания)
+                </button>
+
+                <button
+                  onClick={() => {
+                    setTheoryCompleted(false);
+                    router.push(
+                      `/math/algebra/kvadratnye-uravneniya/${lessonId}?difficulty=medium`,
+                    );
+                  }}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition-all">
+                  🔥 Средний (2 жизни, углублённые задания)
+                </button>
+
+                <button
+                  onClick={() => {
+                    setTheoryCompleted(false);
+                    router.push(`/math/algebra/kvadratnye-uravneniya/${lessonId}?difficulty=hard`);
+                  }}
+                  className="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-xl transition-all">
+                  💪 Сложный (1 жизнь, Premium)
+                </button>
+
+                <p className="text-xs text-gray-400 mt-2">
+                  💡 Совет: начни с лёгкого, если не уверен в своих силах!
+                </p>
               </div>
             </div>
           </div>

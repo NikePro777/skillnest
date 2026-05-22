@@ -29,6 +29,9 @@ export default function LessonClient({
   const [earnedXp, setEarnedXp] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [showChoiceDialog, setShowChoiceDialog] = useState(false);
+  const [showMediumChoiceDialog, setShowMediumChoiceDialog] = useState(false);
+  const [showHardChoiceDialog, setShowHardChoiceDialog] = useState(false);
   const difficulty = lesson.difficulties[difficultyId];
 
   // Проверка существования уровня
@@ -74,19 +77,30 @@ export default function LessonClient({
       // Начисляем XP
       setEarnedXp((prev) => prev + currentStep.xp);
 
-      // Переход к следующему шагу
+      // Проверяем, последний ли это шаг
       if (!isLastStep) {
+        // Переход к следующему шагу
         setCurrentStepIndex((prev) => prev + 1);
         setSelectedAnswer(null);
         setShowHint(false);
         setShowExplanation(false);
       } else {
-        // Урок пройден
-        alert(`🎉 Урок пройден! Ты заработал ${earnedXp + currentStep.xp} XP`);
-        router.push('/');
+        // УРОК ЗАВЕРШЁН!
+        if (difficultyId === 'light') {
+          // Для лёгкого уровня — показываем выбор
+          setShowChoiceDialog(true);
+        } else if (difficultyId === 'medium') {
+          setShowMediumChoiceDialog(true);
+        } else if (difficultyId === 'hard') {
+          setShowHardChoiceDialog(true);
+        } else {
+          // Для среднего/сложного — завершаем
+          alert(`🎉 Урок пройден! Ты заработал ${earnedXp + currentStep.xp} XP`);
+          router.push('/');
+        }
       }
     } else {
-      // Неправильный ответ — показываем объяснение
+      // Неправильный ответ
       setShowExplanation(true);
     }
   };
@@ -259,13 +273,20 @@ export default function LessonClient({
                 💡 {currentStep.hint}
               </div>
             )}
-
-            {/* 8. КНОПКА "ЗАВЕРШИТЬ УРОК" (для конгратс) */}
+            {/* КНОПКА "ЗАВЕРШИТЬ УРОК" (для конгратс) */}
             {currentStep.type === 'congrats' && (
               <Button
                 onClick={() => {
-                  alert(`🎉 Урок пройден! Ты заработал ${earnedXp} XP`);
-                  router.push('/');
+                  if (difficultyId === 'light') {
+                    setShowChoiceDialog(true);
+                  } else if (difficultyId === 'medium') {
+                    setShowMediumChoiceDialog(true);
+                  } else if (difficultyId === 'hard') {
+                    setShowHardChoiceDialog(true); // ← ЭТО ДОЛЖНО БЫТЬ
+                  } else {
+                    alert(`🎉 Урок пройден! Ты заработал ${earnedXp} XP`);
+                    router.push('/');
+                  }
                 }}
                 className="w-full bg-green-600 hover:bg-green-700">
                 Завершить урок
@@ -274,6 +295,141 @@ export default function LessonClient({
             )}
           </CardContent>
         </Card>
+        {/* Модальное окно выбора после лёгкого уровня */}
+        {showChoiceDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+            <div className="bg-white rounded-2xl max-w-md w-full mx-4 p-6 text-center shadow-2xl">
+              <div className="text-5xl mb-4">🎉</div>
+              <h2 className="text-2xl font-bold mb-2">Отлично!</h2>
+              <p className="text-gray-600 mb-6">
+                Ты прошёл первый урок на 🌱 лёгком уровне!
+                <br />
+                Хочешь продолжить практику по этой теме?
+              </p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setShowChoiceDialog(false);
+                    router.push(
+                      `/math/algebra/kvadratnye-uravneniya/${lessonId}?difficulty=medium`,
+                    );
+                  }}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                  🔥 Средний уровень (+20 XP)
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowChoiceDialog(false);
+                    router.push(`/math/algebra/kvadratnye-uravneniya/${lessonId}?difficulty=hard`);
+                  }}
+                  className="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                  💪 Сложный уровень (+30 XP, Premium)
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowChoiceDialog(false);
+                    router.push('/');
+                  }}
+                  className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl transition-all">
+                  → На главную
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-400 mt-4">
+                Сложный уровень доступен в премиум-версии
+              </p>
+            </div>
+          </div>
+        )}
+        {/* Модальное окно выбора после среднего уровня */}
+        {showMediumChoiceDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+            <div className="bg-white rounded-2xl max-w-md w-full mx-4 p-6 text-center shadow-2xl">
+              <div className="text-5xl mb-4">🔥</div>
+              <h2 className="text-2xl font-bold mb-2">Глубокое понимание!</h2>
+              <p className="text-gray-600 mb-6">
+                Ты отлично углубился в тему коэффициентов!
+                <br />
+                <br />
+                <span className="font-semibold">Как хочешь продолжить?</span>
+              </p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setShowMediumChoiceDialog(false);
+                    router.push(`/math/algebra/kvadratnye-uravneniya/${lessonId}?difficulty=hard`);
+                  }}
+                  className="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                  💪 Стать магистром этой темы (+30 XP, Premium)
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowMediumChoiceDialog(false);
+                    router.push(
+                      `/math/algebra/kvadratnye-uravneniya/${lessonId + 1}?difficulty=light`,
+                    );
+                  }}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                  📚 Перейти к следующему уроку
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowMediumChoiceDialog(false);
+                    router.push('/');
+                  }}
+                  className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl transition-all">
+                  → На главную
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-400 mt-4">
+                Сложный уровень доступен в премиум-версии
+              </p>
+            </div>
+          </div>
+        )}
+        {/* Модальное окно выбора после hard уровня */}
+        {showHardChoiceDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+            <div className="bg-white rounded-2xl max-w-md w-full mx-4 p-6 text-center shadow-2xl">
+              <div className="text-5xl mb-4">🏆</div>
+              <h2 className="text-2xl font-bold mb-2">Мастер коэффициентов!</h2>
+              <p className="text-gray-600 mb-6">
+                Ты освоил тему на уровне магистра!
+                <br />
+                Готов к новым вызовам?
+              </p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setShowHardChoiceDialog(false);
+                    router.push(
+                      `/math/algebra/kvadratnye-uravneniya/${lessonId + 1}?difficulty=light`,
+                    );
+                  }}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl">
+                  📚 Следующий урок
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowHardChoiceDialog(false);
+                    router.push('/');
+                  }}
+                  className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl">
+                  → На главную
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

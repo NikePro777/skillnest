@@ -9,6 +9,8 @@ import { ArrowLeft, ChevronRight, Lightbulb, Lock, Star, Flame } from 'lucide-re
 import Link from 'next/link';
 import { Lesson, DifficultyLevel } from './types';
 import ReactMarkdown from 'react-markdown';
+import TheoryBlock from '@/components/common/TheoryBlock';
+import { TheoryContent } from '@/components/common/TheoryTypes';
 
 type LessonClientProps = {
   lesson: Lesson;
@@ -177,6 +179,7 @@ export default function LessonClient({
           <CardHeader className="text-center">
             <Badge className="mx-auto w-fit mb-2">
               {currentStep.type === 'theory' && '📖 ТЕОРИЯ'}
+              {currentStep.type === 'training' && '🎯 ТРЕНИРОВКА'}
               {currentStep.type === 'question' && '❓ ВОПРОС'}
               {currentStep.type === 'practice' && '✍️ ПРАКТИКА'}
               {currentStep.type === 'motivation' && '💪 МОТИВАЦИЯ'}
@@ -187,28 +190,30 @@ export default function LessonClient({
           <CardContent className="space-y-6">
             {/* 1. КОНТЕНТ ДЛЯ ТЕОРИИ (особое оформление) */}
             {currentStep.type === 'theory' && (
-              <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">📖</span>
-                  <span className="font-semibold text-blue-800">Новое понятие</span>
-                </div>
-                <div className="prose prose-blue max-w-none">
-                  <ReactMarkdown>{currentStep.content}</ReactMarkdown>
-                </div>
-              </div>
+              <TheoryBlock content={currentStep.content as TheoryContent} />
             )}
 
             {/* 2. КОНТЕНТ ДЛЯ ВОПРОСОВ И ПРАКТИКИ (добавляем этот блок!) */}
-            {(currentStep.type === 'question' || currentStep.type === 'practice') && (
+            {(currentStep.type === 'question' ||
+              currentStep.type === 'practice' ||
+              currentStep.type === 'training') && (
               <div className="bg-white rounded-xl p-6 border border-gray-200">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">{currentStep.type === 'question' ? '❓' : '✍️'}</span>
+                  <span className="text-2xl">
+                    {currentStep.type === 'question' && '❓'}
+                    {currentStep.type === 'practice' && '✍️'}
+                    {currentStep.type === 'training' && '🎯'}
+                  </span>
                   <span className="font-semibold text-gray-700">
-                    {currentStep.type === 'question' ? 'Вопрос' : 'Практика'}
+                    {currentStep.type === 'question' && 'Вопрос'}
+                    {currentStep.type === 'practice' && 'Практика'}
+                    {currentStep.type === 'training' && 'Тренировка'}
                   </span>
                 </div>
                 <div className="prose prose-lg max-w-none">
-                  <ReactMarkdown>{currentStep.content}</ReactMarkdown>
+                  {typeof currentStep.content === 'string' && (
+                    <ReactMarkdown>{currentStep.content}</ReactMarkdown>
+                  )}
                 </div>
               </div>
             )}
@@ -224,20 +229,16 @@ export default function LessonClient({
                       setShowHint(false);
                       setShowExplanation(false);
                     }}
-                    className={`
-            p-3 text-left rounded-xl border-2 transition-all
-            ${
-              selectedAnswer === opt
-                ? 'border-indigo-500 bg-indigo-50'
-                : 'border-gray-200 hover:border-indigo-300'
-            }
-          `}>
+                    className={`p-3 text-left rounded-xl border-2 transition-all ${
+                      selectedAnswer === opt
+                        ? 'border-indigo-500 bg-indigo-50'
+                        : 'border-gray-200 hover:border-indigo-300'
+                    }`}>
                     {opt}
                   </button>
                 ))}
               </div>
             )}
-
             {/* 4. КНОПКА "ПРОВЕРИТЬ" (для шагов с вариантами) */}
             {currentStep.options && selectedAnswer && !showExplanation && (
               <Button onClick={handleCheck} className="w-full bg-indigo-600 hover:bg-indigo-700">
@@ -246,21 +247,23 @@ export default function LessonClient({
             )}
 
             {/* 5. КНОПКА "ДАЛЕЕ" (для теории) */}
-            {!currentStep.options && currentStep.type !== 'congrats' && (
-              <Button
-                onClick={() => {
-                  if (!isLastStep) {
-                    setCurrentStepIndex((prev) => prev + 1);
-                  } else {
-                    alert(`🎉 Урок пройден! Ты заработал ${earnedXp} XP`);
-                    router.push('/');
-                  }
-                }}
-                className="w-full bg-indigo-600 hover:bg-indigo-700">
-                Далее
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            )}
+            {!currentStep.options &&
+              currentStep.type !== 'congrats' &&
+              currentStep.type !== 'training' && (
+                <Button
+                  onClick={() => {
+                    if (!isLastStep) {
+                      setCurrentStepIndex((prev) => prev + 1);
+                    } else {
+                      alert(`🎉 Урок пройден! Ты заработал ${earnedXp} XP`);
+                      router.push('/');
+                    }
+                  }}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700">
+                  Далее
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              )}
 
             {/* 6. ОБЪЯСНЕНИЕ ОШИБКИ */}
             {showExplanation && currentStep.correct && (

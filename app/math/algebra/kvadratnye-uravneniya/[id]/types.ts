@@ -1,15 +1,18 @@
-// Типы для уроков этого курса
+// app/math/algebra/kvadratnye-uravneniya/[id]/types.ts
+
+import { TheoryContent } from '@/components/common/TheoryTypes';
+
 export type LessonStep = {
   id: number;
   type: 'theory' | 'training' | 'question' | 'practice' | 'motivation' | 'congrats';
   title?: string;
-  content: string;
+  content: string | TheoryContent; // ← может быть строкой (старый формат) или TheoryContent
   options?: string[];
   correct?: string;
   hint?: string;
   explanation?: string;
   xp: number;
-  allowInfiniteAttempts?: boolean; // для тренировочных заданий
+  allowInfiniteAttempts?: boolean;
   taskBank?: string;
   tasksPerStep?: number;
 };
